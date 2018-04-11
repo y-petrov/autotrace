@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Java: autotracer</title>
+<style type="text/css">
+.box {
+	border-style: solid;
+	border-width: 1pt;
+	border-radius: 15pt;
+	padding: 10pt;
+	margin-right: 10pt;
+}
+
+code, .code {
+	font-family: monospace;
+	color: #04640D;
+}
+
+.log {
+	font-family: monospace;
+	color: #660F05;
+}
+</style>
+</head>
+<body>
+	<article>
+		<h1>Java Compiler plugin: auto trace</h1>
+		<h2>Why?</h2>
+		<p>Needless to say that logging is quite powerful
+			technic/approach/practice/whatever in s/w development. It's used in
+			troubleshooting, more precisely - in problem localizing. Sometimes
+			when you see that the expected behaviour is different from the
+			actual, you can point to troublemaker line[-s] of code immediately.
+			More often it's not the case. It's good if the problem is
+			reproducible and you have full access to the run-time including the
+			ability to use debugger. What if not? In my practice the best I could
+			do in such cases was to stare at logs. I spent over 16 years doing
+			Java for IBM WebSphere and app.server's log files very often were the
+			major source and starting point for localizing the issues. Especially
+			if run-time is not your personal dev app server but some QA or
+			sometimes even prod environment. And the more information can you
+			harvest from the log file, the luckier you are.</p>
+		<h2>How?</h2>
+		<h3>Do right things from scratch</h3>
+		<p>If your project (a) has established coding standards that cover
+			the logging and (b) those standards are forced to obey then you don't
+			need to worry. Your code (in respect to logging) very likely looks
+			like this one:</p>
+		<div class="code box">
+			<pre>package blah.blah;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Blah {
+
+    private static final Logger logger = Logger.getLogger(Blah.class.getName());
+    
+    private Object instVar = null;
+    
+    public Blah(Object param) {
+        logger.entering("blah.blah.Blah", " &lt;init&gt;");
+        instVar = param;
+        logger.exiting("blah.blah.Blah", "<init>");
+    }
+    
+    public void someMethod(String arg0) {
+        logger.entering("blah.blah.Blah", "someMethod");
+    
+        logger.log(Level.FINE, "arg0=[{0}]", arg0);
+    
+        int iVar = arg0 == null ? -1 : arg0.length();
+    
+        logger.log(Level.FINE, "iVar=[{0}]", iVar);
+    
+        logger.exiting("blah.blah.Blah", "someMethod");
+    }
+    
+    public static void main(String[] args) {
+        logger.entering("blah.blah.Blah", "main");
+    
+        Blah theBlah = new Blah(args);
+        theBlah.someMethod("abracadabra");
+    
+        logger.exiting("blah.blah.Blah", "main");
+    }
+}
+			
+			</pre>
+		</div>
+		<br />
+		<p>Then if you need more info on the code execution you change
+			logging level and go digging in the log output:</p>
+		<div class="log box">
+			<pre>...
+4/10/18 1:55:55 PM MDT 1 FINER main ENTRY
+4/10/18 1:55:55 PM MDT 1 FINER ENTRY
+4/10/18 1:55:55 PM MDT 1 FINER RETURN
+4/10/18 1:55:55 PM MDT 1 FINER someMethod ENTRY
+4/10/18 1:55:55 PM MDT 1 FINE someMethod arg0=[abracadabra]
+4/10/18 1:55:55 PM MDT 1 FINE someMethod iVar=[11]
+4/10/18 1:55:55 PM MDT 1 FINER someMethod RETURN
+4/10/18 1:55:55 PM MDT 1 FINER main RETURN
+...</pre>
+		</div>
+		<h3>From scratch? Hmm... It's a little bit late now, isn't it? -
+			No.</h3>
+		<p>
+			This toy project is the attempt to help with the <strong>existing
+				source code</strong> base where the logging was not used properly. The
+			project allows at the build time (when sources are compiled) to add
+			entering and exiting logging statement on entry and exit points in
+			methods and init blocks of not inner classes automatically.
+		</p>
+		<p>The project is the plugin for Java 8 compiler. It's triggered
+			after parsing phase is complete and AST (abstract syntax tree) is
+			built. Then the plugin traverses the tree and:
+		<ul>
+			<li>For each not-inner class the tree of the statement <code>
+					java.util.logging.Logger __l = java.util.logging.Logger.getLogger("<i>&lt;fully-qualified-class-name&gt;</i>");
+				</code> is inserted as very first statement node in the class body's tree
+			</li>
+			<li>For each method and init block of each not-inner class the
+				tree of the statement <code>
+					__l.entering("<i>&lt;fully-qualified-class-name&gt;</i>", "<i>&lt;method-name&gt;</i>");
+				</code> is inserted as very first statement node in the method body's tree
+			</li>
+			<li>For each method's block node and init block node of each
+				not-inner class the tree of the statement <code>
+					__l.exiting("<i>&lt;fully-qualified-class-name&gt;</i>", "<i>&lt;method-name&gt;</i>");
+				</code> is inserted
+				<ul>
+					<li>before each <code>return</code> statement node. If needed,
+						<code>...exiting...</code> and <code>return</code> are wrapped
+						into <code>{...}</code> block.
+					</li>
+					<li>For the init blocks and void methods without explicit <code>return</code>,
+						the <code>...exiting...</code> is inserted as very last statement
+						node
+					</li>
+				</ul>
+			</li>
+		</ul>
+		</p>
+		<p>After AST is modified by the plugin, the compiler continues the
+			processing of the compilation unit (source file).</p>
+		<h4>Example</h4>
+		<p>
+			Here is the example. Below is the Java source code file
+			<code>test/test/subpkg/yp/Test02.java</code>
+			:
+		</p>
+		<div class="code box">
+			<pre>package test.test.subpkg.yp;
+
+public class Test02 {
+    
+    static Object varStat = null;
+    
+    static {
+        varStat = "ABC";
+    }
+    
+    Object varInst = null;
+
+    {
+        varInst = "123";
+    }
+    
+    public void m1(Object arg) {
+        if (arg == null)
+            return;
+        System.out.println("hi there...");
+    }
+}
+
+class Test02_a {
+    public Test02_a(String arg) {
+        return;
+    }
+}</pre>
+		</div>
+		<p>
+			This file has been compiled with the use of the plugin, two
+			<code>.class</code>
+			files have been generated -
+			<code>Test02.class</code>
+			and
+			<code>Test02_a.class</code>
+			. Then those
+			<code>.class</code>
+			files have been decompiled and here the restore sources are:
+		</p>
+		<ul>
+			<li><code>Test02</code>:
+				<div class="code box">
+					<pre>package test.test.subpkg.yp;
+
+import java.util.logging.Logger;
+
+public class Test02 {
+    public static Logger __l = Logger.getLogger("test.test.subpkg.yp.Test02");
+    static Object varStat = null;
+    Object varInst = null;
+
+    public Test02() {
+        __l.entering("test.test.subpkg.yp.Test02", "&lt;instance init&gt;");
+        this.varInst = "123";
+        __l.exiting( "test.test.subpkg.yp.Test02", "&lt;instance init&gt;");
+    }
+
+    public void m1(Object arg0) {
+        __l.entering("test.test.subpkg.yp.Test02", "m1");
+        if (arg0 == null) {
+            __l.exiting("test.test.subpkg.yp.Test02", "m1");
+        } else {
+            System.out.println("hi there...");
+            __l.exiting("test.test.subpkg.yp", "Test02.m1");
+        }
+    }
+
+    static {
+        __l.entering("test.test.subpkg.yp.Test02", "&lt;static init&gt;");
+        varStat = "ABC";
+        __l.exiting("test.test.subpkg.yp.Test02", "&lt;static init&gt;");
+    }
+}</pre>
+				</div></li>
+			<li><code>Test02_a</code>:
+				<div class="code box">
+					<pre>package test.test.subpkg.yp;
+
+import java.util.logging.Logger;
+
+class Test02_a {
+    public static Logger __l = Logger.getLogger("test.test.subpkg.yp.Test02_a");
+
+    public Test02_a(String arg0) {
+        __l.entering("test.test.subpkg.yp.Test02_a", "&lt;init&gt;");
+        __l.exiting("test.test.subpkg.yp.Test02_a", "&lt;init&gt;");
+    }
+}</pre>
+				</div></li>
+		</ul>
+		<h4>How to use</h4>
+		<p>The use is very simple.
+		<ol>
+			<li>Build the plugin project</li>
+			<li>Make sure that the plugin's jar is in the <code>javac</code>'s
+				classpath
+			</li>
+			<li>Add one more oprion to <code>javac</code> command line: <code>-Xplugin:AutoTracerPlugin</code></li>
+		</ol>
+		That's it.
+		</p>
+	</article>
+
+</body>
+</html>
