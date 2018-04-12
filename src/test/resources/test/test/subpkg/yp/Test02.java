@@ -1,5 +1,7 @@
 package test.test.subpkg.yp;
 
+import java.util.Comparator;
+
 public class Test02 {
 	
 	static Object varStat = null;
@@ -18,12 +20,16 @@ public class Test02 {
 			return;
 		System.out.println("hi there...");
 		Test02Nested t02n = new Test02Nested();
+		
+		t02n.myC.compare(new Test02(), new Test02());
+		
 		t02n.m();
 	}
 	
 	public static void main(String[] args) {
 		Test02 t02 = new Test02();
 		t02.m1(args);
+		
 	}
 	
 	public Test02() {
@@ -34,7 +40,7 @@ public class Test02 {
 		System.out.println("...constructor... ...args...");
 	}
 	
-	public class Test02Nested implements {
+	public class Test02Nested {
 		public Test02Nested() {
 			System.out.println("constr");
 		}
@@ -46,6 +52,16 @@ public class Test02 {
 			System.out.println("1");
 			return "1";
 		}
+		
+		private Comparator<Test02> myC = new Comparator<Test02>() {
+			
+			@Override
+			public int compare(Test02 o1, Test02 o2) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+		};
+
 
 		public class Test02NestedNested {
 			public Test02NestedNested() {
