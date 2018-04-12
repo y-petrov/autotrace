@@ -193,7 +193,7 @@ public class ClassModifier extends TreeScanner<Void, Void> {
 					retVal.insert(0, "$");
 				currClzName = ((JCClassDecl) currNode).getSimpleName().toString();
 				if ("".equals(currClzName))
-					currClzName = "anonymous";
+					currClzName = "<anonymous>";
 				retVal.insert(0, currClzName);
 			}
 			currNode = TreePath.getPath(cut, currNode).getParentPath().getLeaf();

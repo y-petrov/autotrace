@@ -31,7 +31,10 @@ import ypetrov.javac.plugins.AutoTracerPlugin;
 public class ALTester {
 
 	static JavaCompiler javac = null;
-	static String testClassesRoot = null;
+
+	// Assuming that the test's working directory is the project root...
+	public static final String TEST_CLASSES_ROOT = Paths.get("src", "test", "resources").toAbsolutePath().toString();
+
 	static StandardJavaFileManager fileManager = null;
 	static URLClassLoader ucl = null;
 
@@ -39,13 +42,11 @@ public class ALTester {
 	public static void setup() throws Exception {
 		javac = ToolProvider.getSystemJavaCompiler();
 
-		// Assuming that the test's working directory is the project root...
-		testClassesRoot = Paths.get("src", "test", "resources").toAbsolutePath().toString();
 		fileManager = javac.getStandardFileManager(null, null, null);
-		ucl = URLClassLoader.newInstance(new URL[] { new URL("file://" + testClassesRoot + "/") }, /* ALTester.class.getClassLoader() */ null);
+		ucl = URLClassLoader.newInstance(new URL[] { new URL("file://" + TEST_CLASSES_ROOT + "/") }, null);
 	}
 
-	//@Test
+	@Test
 	public void testSimple() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test01";
 
@@ -58,7 +59,7 @@ public class ALTester {
 	}
 
 	@Test
-	public void testSimple2() throws Exception {
+	public void testInners() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test02";
 
 		// 1. Compile
@@ -74,8 +75,8 @@ public class ALTester {
 		try {
 			fileManager.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// What can I do?...
+			System.err.println(e);
 		}
 	}
 
@@ -109,13 +110,18 @@ public class ALTester {
 	}
 
 	private boolean compileClass(String classFqn) {
-		File[] files = new File[] { new File(testClassesRoot + "/" + classFqn.replaceAll("\\.", "/") + ".java") }; // input for first compilation task
+		File[] files = new File[] { new File(TEST_CLASSES_ROOT + "/" + classFqn.replaceAll("\\.", "/") + ".java") }; // input for first compilation task
 		Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(files));
 		boolean retVal = javac
 				.getTask(null, fileManager, null, Arrays.asList(new String[] { "-Xplugin:" + AutoTracerPlugin.PLUGIN_NAME }), null, compilationUnits).call();
 		return retVal;
 	}
 
+	/** The method <b><u>must</u></b> take the only argument - <code>String[]</code>.
+	 * @param classFqn
+	 * @param mName
+	 * @throws Exception
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void runClass(String classFqn, String mName) throws Exception {
 		Class tCz = ucl.loadClass(classFqn);
