@@ -34,16 +34,31 @@ public class Test02 {
 		System.out.println("...constructor... ...args...");
 	}
 	
-	public class Test02Nested {
+	public class Test02Nested implements {
 		public Test02Nested() {
 			System.out.println("constr");
 		}
 		public String m() {
+			Test02NestedNested t02nn = new Test02NestedNested();
+			t02nn.mnn();
 			if (Math.random() < 0.2)
 				return "2";
 			System.out.println("1");
 			return "1";
 		}
+
+		public class Test02NestedNested {
+			public Test02NestedNested() {
+				System.out.println("constr");
+			}
+			public String mnn() {
+				if (Math.random() < 0.2)
+					return "2";
+				System.out.println("1");
+				return "1";
+			}
+		}
+	
 	}
 
 }
