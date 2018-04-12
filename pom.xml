@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>javac-ypetrov.javac.plugins</groupId>
-	<artifactId>auto-logger</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>auto-tracer</artifactId>
+	<version>0.0.1</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -25,10 +25,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<scm>
-		<url>scm:git:file:////home/yp/git/eclipse-01/</url>
-		<connection>scm:git:file:////home/yp/git/eclipse-01/</connection>
-		<developerConnection>scm:git:file:////home/yp/git/eclipse-01/</developerConnection>
-		<tag>HEAD</tag>
-	</scm>
 </project>

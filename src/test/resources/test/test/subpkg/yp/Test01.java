@@ -6,7 +6,7 @@ import java.util.List;
 public class Test01 {
 
 	{
-		System.out.println("hardcoded - instance init block");
+		System.out.println("hardcoded - instance init block 1");
 	}
 
 	public Test01(String pArg) {
@@ -21,12 +21,6 @@ public class Test01 {
 		Test01 t01 = new Test01();
 
 		System.out.println("hardcoded - in main");
-
-		/*
-		 * Comparator<Integer> cmpInt = new Comparator<Integer>() {
-		 * 
-		 * @Override public int compare(Integer o1, Integer o2) { if (o1 != null && o2 != null) return o1.compareTo(o2); else return 0; } };
-		 */
 
 		t01.m1();
 
@@ -68,10 +62,9 @@ public class Test01 {
 	}
 
 	static {
-		System.out.println("hardcoded - static init");
+		System.out.println("hardcoded - static init 1");
 		{
-			System.out.println("hardcoded - instance static init - nested block");
-			System.out.println("hardcoded - instance static init - nested block");
+			System.out.println("hardcoded - instance static init 1 - nested block");
 		}
 	}
 
@@ -79,23 +72,12 @@ public class Test01 {
 	}
 
 	private String m1() {
+		if (Math.random() < 0.5)
+			return "a";
 		return "";
 	}
 
 	List<String> myList = null;
-
-	static class TestNest01 {
-
-		String m(int i) {
-			Top2 t2 = new Top2();
-			System.out.println(t2.dummyVar);
-			return null;
-		}
-
-		class TestNestNest01 {
-
-		}
-	}
 
 	{
 		String str = "2nd instance init block";

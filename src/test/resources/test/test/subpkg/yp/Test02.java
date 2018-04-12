@@ -17,6 +17,13 @@ public class Test02 {
 		if (arg == null)
 			return;
 		System.out.println("hi there...");
+		Test02Nested t02n = new Test02Nested();
+		t02n.m();
+	}
+	
+	public static void main(String[] args) {
+		Test02 t02 = new Test02();
+		t02.m1(args);
 	}
 	
 	public Test02() {
@@ -26,11 +33,17 @@ public class Test02 {
 	public Test02(String arg) {
 		System.out.println("...constructor... ...args...");
 	}
-
-}
-
-class Test02_a {
-	public Test02_a(Object arg) {
-		return;
+	
+	public class Test02Nested {
+		public Test02Nested() {
+			System.out.println("constr");
+		}
+		public String m() {
+			if (Math.random() < 0.2)
+				return "2";
+			System.out.println("1");
+			return "1";
+		}
 	}
+
 }

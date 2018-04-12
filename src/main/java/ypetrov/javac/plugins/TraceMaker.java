@@ -22,7 +22,7 @@ import com.sun.tools.javac.util.Names;
  */
 public class TraceMaker {
 
-	private static final String LOGGER_VAR_NAME = "__l";
+	public static final String LOGGER_VAR_NAME = "__l";
 
 	private TreeMaker tm = null;
 	private Names names = null;
@@ -41,7 +41,7 @@ public class TraceMaker {
 	public JCExpressionStatement makeEnteringStmt(String pClzName, String pMethName) {
 		JCExpressionStatement retVal = null;
 
-		JCExpression fEntering = makeFieldAccess(LOGGER_VAR_NAME + ".entering");
+		JCExpression fEntering = makeFieldAccess(makeLogVarRef(pClzName) + ".entering");
 		JCMethodInvocation call = tm.Apply(List.nil(), fEntering, List.of(tm.Literal(pClzName), tm.Literal(pMethName)));
 		call.pos = -1;
 
@@ -60,7 +60,7 @@ public class TraceMaker {
 	public JCExpressionStatement makeExitingStmt(String pClzName, String pMethName) {
 		JCExpressionStatement retVal = null;
 
-		JCExpression fExiting = makeFieldAccess(LOGGER_VAR_NAME + ".exiting");
+		JCExpression fExiting = makeFieldAccess(makeLogVarRef(pClzName) + ".exiting");
 		JCMethodInvocation call = tm.Apply(List.nil(), fExiting, List.of(tm.Literal(pClzName), tm.Literal(pMethName)));
 		call.pos = -1;
 		
@@ -139,5 +139,12 @@ public class TraceMaker {
 		}
 		return retVal;
 	}
-
+	
+	/** Handles the reference to logger variables from both outer and inner classes
+	 * @param pClzName
+	 * @return
+	 */
+	private String makeLogVarRef(String pClzName) {
+		return pClzName.replaceAll("\\$.*", ".this") + "." + LOGGER_VAR_NAME;
+	}
 }
