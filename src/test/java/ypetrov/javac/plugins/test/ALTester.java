@@ -46,7 +46,7 @@ public class ALTester {
 		ucl = URLClassLoader.newInstance(new URL[] { new URL("file://" + TEST_CLASSES_ROOT + "/") }, null);
 	}
 
-	@Test
+//	@Test
 	public void testSimple() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test01";
 
@@ -58,9 +58,21 @@ public class ALTester {
 		runClass(testClassName, "main");
 	}
 
-	@Test
+//	@Test
 	public void testInners() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test02";
+
+		// 1. Compile
+		boolean javacStatus = compileClass(testClassName);
+		assertTrue("Compilation failed", javacStatus);
+
+		// 2. Run
+		runClass(testClassName, "main");
+	}
+
+	@Test
+	public void testDefaultPkg() throws Exception {
+		String testClassName = "Test03";
 
 		// 1. Compile
 		boolean javacStatus = compileClass(testClassName);

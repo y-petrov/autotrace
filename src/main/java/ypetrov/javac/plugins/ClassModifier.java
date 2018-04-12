@@ -39,7 +39,7 @@ public class ClassModifier extends TreeScanner<Void, Void> {
 		tm = TreeMaker.instance(ctx);
 		names = Names.instance(ctx);
 		logger = Log.instance(ctx);
-		pkgName = cut.getPackageName().toString();
+		pkgName = cut.getPackageName() == null ? "<default>" : cut.getPackageName().toString();
 		return;
 	}
 
