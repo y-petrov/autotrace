@@ -93,3 +93,12 @@ user@host:~/git/autotrace/src/test/resources>
 ```
 
 In general - that's it. In my past when I had to find why JavaEE app does something wrong, the enabling tracing helped ne a lot. I hope this plugin will help you too.
+ 
+ One more thing to tell - the plugin has been developed and tested with Java8 as of:
+ ```console
+ user@host:~/git/autotrace> java -version
+openjdk version "1.8.0_151"
+OpenJDK Runtime Environment (IcedTea 3.6.0) (build 1.8.0_151-b12 suse-10.18.2-x86_64)
+OpenJDK 64-Bit Server VM (build 25.151-b12, mixed mode)
+user@host:~/git/autotrace>
+ ```
