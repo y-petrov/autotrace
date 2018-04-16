@@ -46,7 +46,7 @@ public class ALTester {
 		ucl = URLClassLoader.newInstance(new URL[] { new URL("file://" + TEST_CLASSES_ROOT + "/") }, null);
 	}
 
-//	@Test
+	@Test
 	public void testSimple() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test01";
 
@@ -54,11 +54,14 @@ public class ALTester {
 		boolean javacStatus = compileClass(testClassName);
 		assertTrue("Compilation failed", javacStatus);
 
-		// 2. Run
+		// 2. Tune logger
+		tuneLogger(testClassName);
+		
+		// 3. Run
 		runClass(testClassName, "main");
 	}
 
-//	@Test
+	@Test
 	public void testInners() throws Exception {
 		String testClassName = "test.test.subpkg.yp.Test02";
 
@@ -66,7 +69,10 @@ public class ALTester {
 		boolean javacStatus = compileClass(testClassName);
 		assertTrue("Compilation failed", javacStatus);
 
-		// 2. Run
+		// 2. Tune logger
+		tuneLogger(testClassName);
+		
+		// 3. Run
 		runClass(testClassName, "main");
 	}
 
@@ -78,7 +84,10 @@ public class ALTester {
 		boolean javacStatus = compileClass(testClassName);
 		assertTrue("Compilation failed", javacStatus);
 
-		// 2. Run
+		// 2. Tune logger
+		tuneLogger("<default>." + testClassName);
+		
+		// 3. Run
 		runClass(testClassName, "main");
 	}
 
@@ -137,7 +146,6 @@ public class ALTester {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void runClass(String classFqn, String mName) throws Exception {
 		Class tCz = ucl.loadClass(classFqn);
-		tuneLogger(classFqn);
 		Object tObj = tCz.newInstance();
 		Method m = tCz.getMethod(mName, String[].class);
 		m.invoke(tObj, new Object[] { new String[0] });

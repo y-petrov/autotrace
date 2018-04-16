@@ -46,7 +46,6 @@ public class Test01 {
 		}
 
 		for (;;) {
-			// return;
 			if (Math.random() > 0.2)
 				break;
 		}

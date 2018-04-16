@@ -23,6 +23,7 @@ import com.sun.tools.javac.util.Names;
 public class TraceMaker {
 
 	public static final String LOGGER_VAR_NAME = "__l";
+	public static final String DEFAULT_PKG = "<default>";
 
 	private TreeMaker tm = null;
 	private Names names = null;
@@ -103,7 +104,7 @@ public class TraceMaker {
 	 */
 	public JCVariableDecl makeLogVar(String pLoggerName) {
 		JCVariableDecl retVal = null;
-		JCModifiers logVarModifiers = tm.Modifiers(Flags.PUBLIC /*PRIVATE*/ | Flags.STATIC);
+		JCModifiers logVarModifiers = tm.Modifiers(Flags.PRIVATE | Flags.STATIC | Flags.FINAL );
 		Name logVarName = names.fromString(LOGGER_VAR_NAME);
 		JCExpression logVarType = makeFieldAccess("java.util.logging.Logger");
 		JCExpression logVarInit = tm.Apply(List.nil(), makeFieldAccess("java.util.logging.Logger.getLogger"), List.of(tm.Literal(pLoggerName)));
@@ -145,6 +146,6 @@ public class TraceMaker {
 	 * @return
 	 */
 	private String makeLogVarRef(String pClzName) {
-		return pClzName.replaceAll("\\$.*", ".this") + "." + LOGGER_VAR_NAME;
+		return pClzName.replaceAll(DEFAULT_PKG, "").replaceAll("\\$.*", ".this") + "." + LOGGER_VAR_NAME;
 	}
 }
