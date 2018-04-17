@@ -25,7 +25,7 @@ test/test/subpkg/yp/Test01.java:70: warning: No Autotrace for empty block
 1 warning
 user@host:~/git/autotrace/src/test/resources>
 ```
-Autotster printed one warning - it's OK, the empty blocks `{ }`, both method and class init, are not augmented with entry/exit logging.
+Autotracer printed one warning - it's OK, the empty blocks `{ }`, both method and class init, are not augmented with entry/exit logging.
 
 Let's run it:
 ```console
